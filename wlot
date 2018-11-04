@@ -1,0 +1,274 @@
+options:
+	期數: 107000002
+	
+	系統名: &d【&b魚&e彩&d】&r
+	
+	彩券名: &b魚&e彩
+	
+	上期開出號碼: 1,2,3,4,5,6,7,8,9,10,11,12
+	
+	設定: "plugins\Skript\魚彩\config.yml"
+	
+	獎號紀錄: "plugins\Skript\魚彩\WinN.yml"
+	
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+
+	
+	
+	
+	
+	
+	
+on load:
+	delete {上期開獎日期} and {開獎倒數} and {單張價格} and {上期期別} and {本期期別} and {購買資訊} and {系統名} and {彩券名} and {頭獎金} and {貳獎金} and {參獎金} and {肆獎金} and {fgnum} and {fgb}
+	if yaml value "fg.系統名" of file {@設定} is not set:
+		set yaml value "fg.系統名" of file {@設定} to "&d【&b魚&e彩&d】&r"
+		set yaml value "fg.彩券名" of file {@設定} to "&b魚&e彩"
+	if yaml value "fg.期別" of file {@設定} is not set:
+		set yaml value "fg.期別" of file {@設定} to 1000001
+	if yaml value "fg.開獎倒數" of file {@設定} is not set:
+		set yaml value "fg.單期時間" of file {@設定} and yaml value "fg.開獎倒數" of file {@設定} to "5 day"
+	if yaml value "fg.單張價格" of file {@設定} is not set:
+		set yaml value "fg.單張價格" of file {@設定} to 1000
+	if yaml value "fg.可否購買" of file {@設定} is not set:
+		set yaml value "fg.可否購買" of file {@設定} to true
+	if yaml value "fg.訊息設定" of file {@設定} is not set:
+		set yaml value "fg.訊息設定.購買資訊" of file {@設定} to "&b&m－－－－－－－－－－－<系統名>&b&m－－－－－－－－－－－%nl%&d目前期別: &6第 &a<本期期別> &6期    &c將於<開獎倒數>後開獎%nl%&f%nl%&1&m=====&e玩法說明:%nl%&f01~24的號碼中任選12個號碼，使用指令輸入。(不可重複)%nl%&f開獎時，將隨機開出12個號碼%nl%&6各獎項的中獎方式如下:%nl%&1&m=====&d頭獎  &f對中當期12個獎號 或 對中當期0個獎號%nl%&6獎金: &c<頭獎獎金>%nl%&1&m=====&e貳獎  &f對中當期任11個獎號 或 對中任1個獎號%nl%&6獎金: &c<貳獎獎金>%nl%&1&m=====&b參獎  &f對中當期任10個獎號 或 對中任2個獎號%nl%&6獎金: &c<參獎獎金>%nl%&1&m=====&a肆獎  &f對中當期任9個獎號 或 對中任3個獎號%nl%&6獎金: &c<肆獎獎金>%nl%&f%nl%&c目前一張價格: &e<單張價格>$     &6兌獎資訊: &b/wlot 2%nl%&1&m=====&e購買請使用指令: &a/wlotb {第1個號碼} {第2個號碼} ... {第12個號碼}%nl%&1&m=====&b範例:/wlotb 1 2 3 4 5 6 7 8 9 10 11 12%nl%&b&m－－－－－－－－－－－－－－－－－－－－－－－－－－－"
+		#set yaml value "fg.訊息設定.兌獎資訊" of file {@設定} to line 2 from url "https://raw.githubusercontent.com/rainfishs/wwlotinfo/master/1"
+	set {上期開獎日期} to yaml value "list.%{上期期別}%.時間" of file {@獎號紀錄}
+	set {上期期別} and {本期期別} to yaml value "fg.期別" of file {@設定}
+	set {上期期別} to {上期期別} parsed as number
+	remove 1 from {上期期別}
+	set {系統名} to yaml value "fg.系統名" of file {@設定}
+	set {彩券名} to yaml value "fg.彩券名" of file {@設定}
+	set {單張價格} to yaml value "fg.單張價格" of file {@設定}
+	set {開獎倒數} to yaml value "fg.開獎倒數" of file {@設定}
+	set {開獎倒數} to {開獎倒數} parsed as timespan
+	set {單張價格} to {單張價格} parsed as number
+	set {頭獎金} to {單張價格} * 300000
+	set {貳獎金} to {單張價格} * 2000
+	set {參獎金} to {單張價格} * 10
+	set {肆獎金} to {單張價格} * 2
+	set {購買資訊} to yaml value "fg.訊息設定.購買資訊" of file {@設定}
+	set {fgb} to yaml value "fg.可否購買" of file {@設定}
+on unload:
+	delete {上期開獎日期} and {開獎倒數} and {單張價格} and {上期期別} and {本期期別} and {購買資訊} and {系統名} and {彩券名} and {頭獎金} and {貳獎金} and {參獎金} and {肆獎金} and {fgnum} and {fgb}
+every 5 minutes:
+	if {開獎倒數} > 5 minutes:
+		remove 5 minutes from {開獎倒數}
+		set yaml value "fg.開獎倒數" of file {@設定} to "%{開獎倒數}%"
+	if {開獎倒數} = 5 minutes:
+		loop 24 times:
+			wait 10 second
+			remove 10 second from {開獎倒數}
+			broadcast "%{系統名}%&6開獎倒數 %{開獎倒數}%"
+		loop 60 times:
+			wait 1 second
+			remove 1 second from {開獎倒數}
+			broadcast "%{系統名}%&6開獎倒數 %{開獎倒數}%"
+		console command "/wlota go"
+command /ff:
+	trigger:
+		set {_bb} to yaml value "fg.訊息設定.購買資訊" of file {@設定}
+		send "%{_bb}%"
+command /WinWinLotteryadmin [<text>] [<text>]:
+	aliases: /wlota
+	trigger:
+		sender has permission "wlot.admin"
+		if arg-1 is "reload":
+			player command "/skript reload 魚彩"
+		if arg-1 is "set":
+			set {fgb} to arg-2
+			send "%{系統名}%&6&l成功設置: &a&l可否購票 = %{fgb}%" to sender
+		else if arg-1 is "go":
+			set {開獎倒數} to "---"
+			loop 24 times:
+				set {_rdnum::%loop-number%} to loop-number
+			delete {_ronum2::*} and {_ronum}
+			set {_數量} to 0
+			while {_數量} < 12:
+				loop {_rdnum::*}:
+					set {_random} to a random integer between 1 and 20
+					if {_random} = 1:
+						if {_數量} < 12:
+							add {_rdnum::%loop-index%} to {_ronum2::*}
+							delete {_rdnum::%loop-index%}
+							add 1 to {_數量}
+			set {_期數} to yaml value "fg.期別" of file {@設定}
+			set {_期數} to {_期數} parsed as number
+			broadcast "%{系統名}% &d%{_期數}%期號碼將開出:"
+			loop {_ronum2::*}:
+				wait 1 second
+				broadcast "&1===&a第&e%loop-index%&a個號碼: &b%loop-value%"
+				if {_ronum} is not set:
+					set {_ronum} to "%loop-value%"
+				else:
+					set {_ronum} to "%{_ronum}%,%loop-value%"
+			set yaml value "list.%{_期數}%.號碼" of file {@獎號紀錄} to {_ronum}
+			set yaml value "list.%{_期數}%.時間" of file {@獎號紀錄} and {上期開獎日期} to "%now%"
+			set {fgnum} to {_ronum}
+			broadcast "&e&l獎號&a(依開出順序): &b&l%{_ronum}%"
+			broadcast "&1&m=====&6兌獎資訊: &b/fg 2"
+			delete {_ronum2::*} and {_ronum}
+			set {本期期別} and {上期期別} and yaml value "fg.期別" of file {@設定} to {_期數} + 1
+			remove 1 from {上期期別}
+			wait 1 second
+			set yaml value "fg.開獎倒數" of file {@設定} to yaml value "fg.單期時間" of file {@設定}
+			set {開獎倒數} to yaml value "fg.開獎倒數" of file {@設定}
+			set {開獎倒數} to {開獎倒數} parsed as timespan
+		else:
+			send "&1&m===&e開票: &a/fga go"
+			send "&1&m===&b是否可以購買: &a/fga set true/false"
+command /WinWinLottery [<text>]:
+	aliases: /wlot
+	trigger:
+		if arg-1 is not set:
+			set {_倒數顯示} to "%{開獎倒數}%"
+			set {_wbinfo} to {購買資訊}
+			replace "seconds" and "second" with "秒 " in {_倒數顯示}
+			replace "minutes" and "minute" with "分鐘 " in {_倒數顯示}
+			replace "hours" and "hour" with "小時 " in {_倒數顯示}
+			replace "days" and "day" with "天 " in {_倒數顯示}
+			replace "and" and "  " with "" in {_倒數顯示}
+			replace "<系統名>" with "%{系統名}%" in {_wbinfo}
+			replace "<本期期別>" with "%{本期期別}%" in {_wbinfo}
+			replace "<開獎倒數>" with "%{_倒數顯示}%" in {_wbinfo}
+			replace "<頭獎獎金>" with "%{頭獎金}%" in {_wbinfo}
+			replace "<貳獎獎金>" with "%{貳獎金}%" in {_wbinfo}
+			replace "<參獎獎金>" with "%{參獎金}%" in {_wbinfo}
+			replace "<肆獎獎金>" with "%{肆獎金}%" in {_wbinfo}
+			replace "<單張價格>" with "%{單張價格}%" in {_wbinfo}
+			send "%{_wbinfo}%"
+		#else if arg-1 is "2":
+		#	
+		else if arg-1 is "help":
+			send "&b&m－－－－－－－－－－－%{系統名}%&b&m－－－－－－－－－－－"
+			send "&1===&b/wlot help &a查看幫助%nl%&1===&b/wlotb &a購買彩券%nl%&1===&b/wlotd &a自動兌獎%nl%&1===&b/wlot &a查看購買資訊%nl%&1===&b/wlot 2 &a查看兌獎資訊"
+			if sender has permission "wlot.admin":
+				send "&1===&c/wlota &6查看管理員指令"
+		else:
+			send "%{系統名}%&c錯誤的指令!! &b使用/wlot help &a查看幫助"
+command /WinWinLotteryBuy [<text>] [<text>] [<text>] [<text>] [<text>] [<text>] [<text>] [<text>] [<text>] [<text>] [<text>] [<text>] [<text>]:
+	aliases: /wlotb
+	trigger:
+		{fgb} is true
+		if arg-1 is not set:
+			send "&1&m===&e指令: &a/fgb {第1個號碼} {第2個號碼} ... {第12個號碼}"
+			send "&1&m===&b範例:/fgb 1 2 3 4 5 6 7 8 9 10 11 12"
+		else if player's money is less than 1000:
+			send "%{系統名}%&c餘額不足!!"
+			stop trigger
+		else:
+			set {_fg} to "%arg-1%,%arg-2%,%arg-3%,%arg-4%,%arg-5%,%arg-6%,%arg-7%,%arg-8%,%arg-9%,%arg-10%,%arg-11%,%arg-12%"
+			set {_fg2::*} to {_fg} split at ","
+			loop {_fg2::*}:
+				set {_驗證} to loop-value
+				loop 10 times:
+					replace all "%loop-number - 1%" with "" in {_驗證}
+				if {_驗證} isn't "":
+					send "%{系統名}%&4&l錯誤! &c使用非數字字符 或 號碼尚未齊全"
+					stop trigger
+				set {_fg::%loop-index%} to loop-value parsed as integer
+				if {_fg::%loop-index%} < 1:
+					send "%{系統名}%&4&l錯誤! &a第&e %loop-index% &a個號碼 &c數字小於1!!"
+					stop trigger
+				if {_fg::%loop-index%} > 24:
+					send "%{系統名}%&4&l錯誤! &a第&e %loop-index% &a個號碼 &c數字超過24!!"
+					stop trigger
+				set {_驗證} to loop-value parsed as integer
+				set {_驗證序數} to loop-index parsed as integer
+				loop {_fg2::*}:
+					set {_驗證序數2} to loop-index-2 parsed as integer
+					if {_驗證序數} != {_驗證序數2}:
+						if {_驗證} = {_fg::%loop-index-2%}:
+							send "%{系統名}%&4&l錯誤! &a第&e %loop-index-2% &a個號碼 &e跟 &a第&e %{_驗證序數}% &a個號碼 &c&l重複!"
+							stop trigger
+			remove 1000 from the player's money
+			give a paper of fortune 0 named "&f%argument 1% %argument 2% %argument 3% %argument 4% %argument 5% %argument 6% %argument 7% %argument 8% %argument 9% %argument 10% %argument 11% %argument 12% &e第&c{@期數}&e期%{彩券名}%" to the player
+			execute console command "/eco give rainfishs 1000"
+command /WinWinLotteryDuijiang:
+	aliases: /wlotd
+	trigger:
+		set {_numk::*} to name of player's tool split at " "
+		set {_fgnum} to "{@上期開出號碼}"
+		set {_fgnum::*} to {_fgnum} split at ","
+		if {_numk::13} = "&e第&c{@期數}&e期%{彩券名}%":
+			delete {_numk::13}
+			replace all "&f" with "" in {_numk::*}
+			loop {_fgnum::*}:
+				set {_fgnum::%loop-index%} to loop-value parsed as integer
+			set {_runt} to 0
+			loop {_numk::*}:
+				if {_runt} < 12:
+					set {_num} to loop-value parsed as integer
+					add 1 to {_runt}
+					loop {_fgnum::*}:
+						if {_num} = {_fgnum::%loop-index-2%}:
+							add 1 to {_fgs}
+			if {_fgs} > 8:
+				if {_fgs} > 9:
+					if {_fgs} > 10:
+						if {_fgs} > 11:
+							send "%{系統名}%&d&l恭喜您中了頭獎!!!"
+							give 300000000 to the player's money
+							broadcast "%{系統名}%&d&l恭喜%player%中了頭獎!!!"
+							add "&f%player% : 中了&d頭獎 " to {fgo::*}
+						else:
+							send "%{系統名}%&e&l恭喜您中了貳獎!!"
+							give 2000000 to the player's money
+							broadcast "%{系統名}%&e&l恭喜%player%中了貳獎!!"
+							add "&f%player% : 中了&e貳獎 " to {fgo::*}
+					else:
+						send "%{系統名}%&b&l恭喜您中了參獎!"
+						give 10000 to the player's money
+						broadcast "%{系統名}%&b&l恭喜%player%中了參獎!"
+						add "&f%player% : 中了&b參獎 " to {fgo::*}
+				else:
+					send "%{系統名}%&a&l恭喜您中了肆獎!"
+					give 2000 to the player's money
+					broadcast "%{系統名}%&a&l恭喜%player%中了肆獎!"
+					add "&f%player% : 中了&a肆獎 " to {fgo::*}
+			else if {_fgs} < 4:
+				if {_fgs} < 3:
+					if {_fgs} < 2:
+						if {_fgs} < 1:
+							send "%{系統名}%&d&l恭喜您中了頭獎!!!"
+							give 300000000 to the player's money
+							broadcast "%{系統名}%&d&l恭喜%player%中了頭獎!!!"
+							add "&f%player% : 中了&d頭獎 " to {fgo::*}
+						else:
+							send "%{系統名}%&e&l恭喜您中了貳獎!!"
+							give 2000000 to the player's money
+							broadcast "%{系統名}%&e&l恭喜%player%中了貳獎!!"
+							add "&f%player% : 中了&e貳獎 " to {fgo::*}
+					else:
+						send "%{系統名}%&b&l恭喜您中了參獎!"
+						give 10000 to the player's money
+						broadcast "%{系統名}%&b&l恭喜%player%中了參獎!"
+						add "&f%player% : 中了&b參獎 " to {fgo::*}
+				else:
+					send "%{系統名}%&a&l恭喜您中了肆獎!"
+					give 2000 to the player's money
+					broadcast "%{系統名}%&a&l恭喜%player%中了肆獎!"
+					add "&f%player% : 中了&a肆獎 " to {fgo::*}
+			else:
+				send "%{系統名}%&F沒有中獎QAQ!"
+			remove 1 of player's tool from player
+		else:
+			send "%{系統名}%&4&l錯誤! &c手上並未拿著當期的彩券!"
+command /fgo:
+	trigger:
+		sender has permission "admin"
+		loop {fgo::*}:
+			send "%loop-value%"
